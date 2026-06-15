@@ -1,0 +1,26 @@
+name: C# tests
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Test (.NET ${{ matrix.dotnet }} on ${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        dotnet: ['8.0.x']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+      - name: Restore
+        run: dotnet restore csharp/Yencode.sln
+      - name: Build
+        run: dotnet build csharp/Yencode.sln -c Release --no-restore
+      - name: Test
+        run: dotnet test csharp/Yencode.sln -c Release --no-build --logger "console;verbosity=normal"

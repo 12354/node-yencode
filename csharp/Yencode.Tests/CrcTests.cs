@@ -107,6 +107,35 @@ namespace Yencode.Tests
         }
 
         [Fact]
+        public void Pclmul_MatchesScalar()
+        {
+            if (!Crc32Clmul.IsSupported)
+                return; // not supported on this machine; scalar path already covered
+
+            var rng = new Random(424242);
+            foreach (int size in SizesUpTo(600))
+            {
+                var b = new byte[size];
+                rng.NextBytes(b);
+                uint init = (uint)rng.Next();
+                Assert.Equal(Crc32.ComputeScalar(b, init), Crc32Clmul.Compute(b, init));
+            }
+            // a couple of large buffers
+            for (int i = 0; i < 4; i++)
+            {
+                var b = new byte[200000 + i * 7919];
+                rng.NextBytes(b);
+                uint init = (uint)rng.Next();
+                Assert.Equal(Crc32.ComputeScalar(b, init), Crc32Clmul.Compute(b, init));
+            }
+        }
+
+        private static System.Collections.Generic.IEnumerable<int> SizesUpTo(int max)
+        {
+            for (int i = 16; i <= max; i++) yield return i;
+        }
+
+        [Fact]
         public void ByteConversions()
         {
             uint c = 0x515ad3cc;

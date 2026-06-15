@@ -18,6 +18,9 @@ namespace Yencode
         // slice-by-8 tables: Table[s*256 + b]
         private static readonly uint[] Table = BuildTable();
 
+        // The standard byte-by-byte table (Table[0..255]); used by the PCLMULQDQ path's final reduction.
+        internal static uint[] ByteTable => Table;
+
         private static uint[] BuildTable()
         {
             var t = new uint[8 * 256];
