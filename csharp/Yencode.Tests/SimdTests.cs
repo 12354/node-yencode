@@ -52,6 +52,35 @@ namespace Yencode.Tests
         }
 
         [Fact]
+        public void Simd_VectorInstructions_Actually_Execute()
+        {
+            // Proves the vectorized fast path (the code containing the SSE2/AVX2/NEON intrinsics) is
+            // really reached — not just the SIMD-capable method entered, then everything done scalar.
+            // Combined with the .NET rule "intrinsic + IsSupported => the actual instruction is emitted",
+            // a non-zero count means real SIMD instructions executed on this CPU.
+            if (Yenc.EncoderIsa == IsaLevel.Generic) return;
+
+            var plain = FillRandomPlain(new Random(1), 8192); // no escapes / specials -> maximises fast path
+            SimdHelpers.EncoderVectorBlocks = 0;
+            SimdHelpers.DecoderVectorBlocks = 0;
+            SimdHelpers.Probe = true;
+            byte[] enc, dec;
+            try
+            {
+                enc = Yenc.Encode(plain, 128);
+                dec = Yenc.Decode(enc, false);
+            }
+            finally
+            {
+                SimdHelpers.Probe = false;
+            }
+
+            Assert.Equal(plain, dec); // round-trips correctly via the vector path
+            Assert.True(SimdHelpers.EncoderVectorBlocks > 0, "encoder vector instructions never executed (" + Yenc.EncoderIsa + ")");
+            Assert.True(SimdHelpers.DecoderVectorBlocks > 0, "decoder vector instructions never executed (" + Yenc.DecoderIsa + ")");
+        }
+
+        [Fact]
         public void Encoder_Simd_Matches_Scalar()
         {
             if (Yenc.EncoderIsa == IsaLevel.Generic) return; // no SIMD here; scalar already validated

@@ -17,6 +17,12 @@ namespace Yencode
     {
         internal static bool Supported => Sse2.IsSupported || AdvSimd.Arm64.IsSupported;
 
+        // Test-only instrumentation: when Probe is set, the vector helpers count how many times their
+        // vector instruction sequences actually execute. Off (and effectively free) in normal use.
+        internal static bool Probe;
+        internal static long EncoderVectorBlocks;
+        internal static long DecoderVectorBlocks;
+
         // 16 on SSE2/NEON, 32 on AVX2
         internal static int VectorWidth => Avx2.IsSupported ? 32 : 16;
 
@@ -31,6 +37,7 @@ namespace Yencode
         /// <summary>True if the block contains none of the decoder's special bytes ('=', '\r', '\n').</summary>
         internal static unsafe bool DecoderClean(byte* s, int vw)
         {
+            if (Probe) DecoderVectorBlocks++;
             if (vw == 32)
             {
                 var v = Avx.LoadVector256(s);
@@ -76,6 +83,7 @@ namespace Yencode
         /// </summary>
         internal static unsafe bool EncoderCleanAdd42(byte* s, byte* d, int vw)
         {
+            if (Probe) EncoderVectorBlocks++;
             if (vw == 32)
             {
                 var a = Avx2.Add(Avx.LoadVector256(s), Vector256.Create((byte)42));
