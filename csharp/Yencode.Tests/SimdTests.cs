@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Intrinsics.Arm;
+using System.Runtime.Intrinsics.X86;
 using Xunit;
 
 namespace Yencode.Tests
@@ -26,10 +28,30 @@ namespace Yencode.Tests
         }
 
         [Fact]
+        public void SelectedIsa_MatchesHardware()
+        {
+            // Positive proof that the right vector path is chosen for the current CPU, so a green run
+            // on an ARM runner demonstrates the NEON encoder/decoder (and ARM CRC) are the ones in use.
+            if (Avx2.IsSupported)
+            {
+                Assert.Equal(IsaLevel.Avx2, Yenc.EncoderIsa);
+                Assert.Equal(IsaLevel.Avx2, Yenc.DecoderIsa);
+            }
+            else if (AdvSimd.Arm64.IsSupported && !Sse2.IsSupported)
+            {
+                Assert.Equal(IsaLevel.Neon, Yenc.EncoderIsa);
+                Assert.Equal(IsaLevel.Neon, Yenc.DecoderIsa);
+                Assert.True(Crc32Arm.IsSupported);
+                Assert.Equal(IsaLevel.ArmCrc, Crc32.IsaLevel);
+            }
+        }
+
+        [Fact]
         public void Encoder_Simd_Matches_Scalar()
         {
             if (Yenc.EncoderIsa == IsaLevel.Generic) return; // no SIMD here; scalar already validated
             var rng = new Random(31337);
+            bool any = false;
 
             foreach (var data in SampleDatas(rng))
             {
@@ -45,11 +67,14 @@ namespace Yencode.Tests
                         int colV = off;
                         bool used = EncoderSimd.TryEncode(ls, ref colV, data, dv, true, out int wv);
                         if (!used) continue; // short line / small input -> scalar path
+                        any = true;
 
                         Assert.Equal(Hex(Slice(ds, ws)), Hex(Slice(dv, wv)));
                     }
                 }
             }
+            // prove we actually exercised the SIMD encoder (not a vacuous pass)
+            Assert.True(any, "SIMD encoder path (" + Yenc.EncoderIsa + ") was never exercised");
         }
 
         [Fact]
@@ -57,6 +82,7 @@ namespace Yencode.Tests
         {
             if (Yenc.DecoderIsa == IsaLevel.Generic) return;
             var rng = new Random(8088);
+            bool any = false;
 
             foreach (var data in SampleDatas(rng))
             {
@@ -72,10 +98,12 @@ namespace Yencode.Tests
                     var s2 = DecoderState.Crlf;
                     bool used = DecoderSimd.TryDecodeNoEnd(isRaw, data, dv, ref s2, false, out int wv);
                     if (!used) continue;
+                    any = true;
 
                     Assert.Equal(Hex(Slice(ds, ws)), Hex(Slice(dv, wv)));
                 }
             }
+            Assert.True(any, "SIMD decoder path (" + Yenc.DecoderIsa + ") was never exercised");
         }
 
         [Fact]
@@ -83,6 +111,7 @@ namespace Yencode.Tests
         {
             if (Yenc.DecoderIsa == IsaLevel.Generic) return;
             var rng = new Random(6502);
+            bool any = false;
 
             foreach (var data in SampleDatas(rng))
             {
@@ -94,12 +123,14 @@ namespace Yencode.Tests
                 var s2 = DecoderState.Crlf;
                 bool used = DecoderSimd.TryDecodeEnd(data, dv, ref s2, true, out int rV, out int wV, out var eV);
                 if (!used) continue;
+                any = true;
 
                 Assert.Equal(eS, eV);
                 Assert.Equal(rS, rV);
                 Assert.Equal(s1, s2);
                 Assert.Equal(Hex(Slice(ds, wS)), Hex(Slice(dv, wV)));
             }
+            Assert.True(any, "SIMD end-decoder path (" + Yenc.DecoderIsa + ") was never exercised");
         }
 
         [Fact]
