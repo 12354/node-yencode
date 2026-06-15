@@ -1,0 +1,5 @@
+is_global = true
+build_property.RootNamespace = Yencode
+build_property.ProjectDir = /home/user/node-yencode/csharp/Yencode/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
