@@ -130,9 +130,32 @@ namespace Yencode.Tests
             }
         }
 
+        [Fact]
+        public void ArmCrc_MatchesScalar()
+        {
+            if (!Crc32Arm.IsSupported)
+                return; // not ARM; scalar/x86 paths already covered
+
+            var rng = new Random(525252);
+            foreach (int size in SizesUpTo(600))
+            {
+                var b = new byte[size];
+                rng.NextBytes(b);
+                uint init = (uint)rng.Next();
+                Assert.Equal(Crc32.ComputeScalar(b, init), Crc32Arm.Compute(b, init));
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                var b = new byte[200000 + i * 7919];
+                rng.NextBytes(b);
+                uint init = (uint)rng.Next();
+                Assert.Equal(Crc32.ComputeScalar(b, init), Crc32Arm.Compute(b, init));
+            }
+        }
+
         private static System.Collections.Generic.IEnumerable<int> SizesUpTo(int max)
         {
-            for (int i = 16; i <= max; i++) yield return i;
+            for (int i = 1; i <= max; i++) yield return i;
         }
 
         [Fact]

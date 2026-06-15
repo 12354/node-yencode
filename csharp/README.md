@@ -10,11 +10,11 @@ code and no P/Invoke** — acceleration is provided purely via .NET hardware int
 Every routine has a verified scalar implementation plus a SIMD-accelerated path that is
 selected automatically at runtime and produces byte-for-byte identical results:
 
-| Routine  | Scalar            | SIMD (x86)                          |
-|----------|-------------------|-------------------------------------|
-| Encoder  | `do_encode` port  | SSE2 / AVX2 (packed escape scan + add) |
-| Decoder  | `do_decode` ports | SSE2 / AVX2 (packed special scan + subtract) |
-| CRC32    | slice-by-8 table  | PCLMULQDQ folding                   |
+| Routine  | Scalar            | SIMD (x86)                          | SIMD (ARM)                  |
+|----------|-------------------|-------------------------------------|-----------------------------|
+| Encoder  | `do_encode` port  | SSE2 / AVX2 (packed escape scan + add) | AdvSimd/NEON              |
+| Decoder  | `do_decode` ports | SSE2 / AVX2 (packed special scan + subtract) | AdvSimd/NEON       |
+| CRC32    | slice-by-8 table  | PCLMULQDQ folding                   | ARMv8 CRC32 instructions    |
 
 You can see what was chosen on the current machine:
 
@@ -25,7 +25,7 @@ Crc32.IsaLevel;    // e.g. Pclmul
 ```
 
 The SIMD paths require .NET (Core) 3.0+ intrinsics; the `netstandard2.0` build is
-scalar-only. ARM hardware currently uses the scalar fallback.
+scalar-only.
 
 ## API
 

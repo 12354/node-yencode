@@ -105,9 +105,11 @@ namespace Yencode.Tests
         [Fact]
         public void Crc_Simd_Engaged()
         {
-            // On hardware with PCLMULQDQ this should be the chosen path.
-            if (!Crc32Clmul.IsSupported) return;
-            Assert.Equal(IsaLevel.Pclmul, Crc32.IsaLevel);
+            // On hardware with PCLMULQDQ (x86) or ARMv8 CRC, that should be the chosen path.
+            if (Crc32Clmul.IsSupported)
+                Assert.Equal(IsaLevel.Pclmul, Crc32.IsaLevel);
+            else if (Crc32Arm.IsSupported)
+                Assert.Equal(IsaLevel.ArmCrc, Crc32.IsaLevel);
         }
 
         private static IEnumerable<byte[]> SampleDatas(Random rng)

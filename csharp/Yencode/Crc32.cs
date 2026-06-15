@@ -44,7 +44,10 @@ namespace Yencode
         }
 
         /// <summary>The instruction set used for CRC computation on this machine.</summary>
-        public static IsaLevel IsaLevel => Crc32Clmul.IsSupported ? IsaLevel.Pclmul : IsaLevel.Generic;
+        public static IsaLevel IsaLevel =>
+            Crc32Clmul.IsSupported ? IsaLevel.Pclmul :
+            Crc32Arm.IsSupported ? IsaLevel.ArmCrc :
+            IsaLevel.Generic;
 
         /// <summary>
         /// Computes the CRC-32 of <paramref name="data"/>. Pass the result of a previous call
@@ -54,6 +57,8 @@ namespace Yencode
         {
             if (Crc32Clmul.IsSupported && data.Length >= 64)
                 return Crc32Clmul.Compute(data, init);
+            if (Crc32Arm.IsSupported && data.Length >= 16)
+                return Crc32Arm.Compute(data, init);
             return ComputeScalar(data, init);
         }
 
