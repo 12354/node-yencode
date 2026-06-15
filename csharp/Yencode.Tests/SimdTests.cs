@@ -37,7 +37,12 @@ namespace Yencode.Tests
                 Assert.Equal(IsaLevel.Avx2, Yenc.EncoderIsa);
                 Assert.Equal(IsaLevel.Avx2, Yenc.DecoderIsa);
             }
-            else if (AdvSimd.Arm64.IsSupported && !Sse2.IsSupported)
+            else if (Sse2.IsSupported)
+            {
+                Assert.Equal(IsaLevel.Sse2, Yenc.EncoderIsa);
+                Assert.Equal(IsaLevel.Sse2, Yenc.DecoderIsa);
+            }
+            else if (AdvSimd.Arm64.IsSupported)
             {
                 Assert.Equal(IsaLevel.Neon, Yenc.EncoderIsa);
                 Assert.Equal(IsaLevel.Neon, Yenc.DecoderIsa);
