@@ -103,7 +103,7 @@ namespace Yencode
         };
 
         // computes n mod (2^32 - 1) (almost), via bit-hacks
-        private static uint PowMod(ulong n)
+        internal static uint PowMod(ulong n)
         {
             n = (n >> 32) + (n & 0xffffffff);
             n += n >> 32;
@@ -111,7 +111,7 @@ namespace Yencode
         }
 
         // computes PowMod(n*8) avoiding overflow == rotl(PowMod(n), 3)
-        private static uint BytePow(ulong n)
+        internal static uint BytePow(ulong n)
         {
             uint res = PowMod(n);
             return (res << 3) | (res >> 29);
@@ -131,7 +131,7 @@ namespace Yencode
             return res;
         }
 
-        private static uint ShiftInternal(uint crc, uint n)
+        internal static uint ShiftInternal(uint crc, uint n)
         {
             uint result = crc;
             uint power = 0;
