@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yencode", "Yencode\Yencode.csproj", "{A152AD75-4E11-4FC1-BCFC-8CD8B00D84DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yencode.Tests", "Yencode.Tests\Yencode.Tests.csproj", "{43071707-FFD5-4475-B145-FCE46D949A57}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A152AD75-4E11-4FC1-BCFC-8CD8B00D84DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A152AD75-4E11-4FC1-BCFC-8CD8B00D84DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A152AD75-4E11-4FC1-BCFC-8CD8B00D84DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A152AD75-4E11-4FC1-BCFC-8CD8B00D84DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43071707-FFD5-4475-B145-FCE46D949A57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43071707-FFD5-4475-B145-FCE46D949A57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43071707-FFD5-4475-B145-FCE46D949A57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43071707-FFD5-4475-B145-FCE46D949A57}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>Yencode</AssemblyName>
+    <RootNamespace>Yencode</RootNamespace>
+    <PackageId>Yencode</PackageId>
+    <Version>1.2.4</Version>
+    <Authors>node-yencode (managed C# port)</Authors>
+    <Description>Fully managed C# port of node-yencode: SIMD-accelerated yEnc encoder/decoder and CRC32 (IEEE), with a scalar fallback. Uses System.Runtime.Intrinsics for SSE2/SSSE3/AVX2 and PCLMULQDQ acceleration with runtime dispatch.</Description>
+    <PackageLicenseExpression>CC0-1.0</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Yencode.Tests" />
+  </ItemGroup>
+
+</Project>

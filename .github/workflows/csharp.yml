@@ -1,0 +1,44 @@
+name: C# tests
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  # Proves the natively-selected SIMD path per OS/CPU:
+  #   ubuntu/windows (x86) -> AVX2 + PCLMULQDQ, macos (Apple Silicon) -> NEON + ARMv8 CRC.
+  test:
+    name: Test (.NET ${{ matrix.dotnet }} on ${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        dotnet: ['8.0.x']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+      - run: dotnet restore csharp/Yencode.sln
+      - run: dotnet build csharp/Yencode.sln -c Release --no-restore
+      - run: dotnet test csharp/Yencode.sln -c Release --no-build --logger "console;verbosity=normal"
+
+  # Proves the remaining x86 paths that the AVX2-capable runners above never exercise,
+  # by forcing the JIT to disable instruction sets (the SimdTests assert which ISA is in use).
+  test-isa-variants:
+    name: Test (${{ matrix.cfg.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cfg:
+          - { name: 'SSE2 (AVX2 disabled)', flags: 'DOTNET_EnableAVX2=0' }
+          - { name: 'scalar (intrinsics disabled)', flags: 'DOTNET_EnableHWIntrinsic=0' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet build csharp/Yencode.sln -c Release
+      - run: ${{ matrix.cfg.flags }} dotnet test csharp/Yencode.sln -c Release --no-build --logger "console;verbosity=normal"
